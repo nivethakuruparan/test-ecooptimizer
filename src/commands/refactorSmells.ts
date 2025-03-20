@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { SmellsDisplayProvider } from "../providers/SmellsDisplayProvider";
+import { SmellsDisplayProvider } from "../providers/SmellsViewProvider";
 
 // 📌 Refactor Code Smells for a File
 export async function refactorSmellsFile(

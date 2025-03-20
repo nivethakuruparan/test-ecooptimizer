@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { SmellsCacheManager } from "../context/SmellsCacheManager"; // Updated import
-import { SmellsDisplayProvider } from "../providers/SmellsDisplayProvider";
+import { SmellsDisplayProvider } from "../providers/SmellsViewProvider";
 
 /**
  * Resets the workspace configuration by clearing the stored path and wiping cached smells.

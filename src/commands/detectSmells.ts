@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import { fetchSmells } from "../api/backend";
-import { SmellsDisplayProvider } from "../providers/SmellsDisplayProvider";
+import { SmellsDisplayProvider } from "../providers/SmellsViewProvider";
 import { getEnabledSmells } from "../utils/smellsData";
 import { SmellsCacheManager } from "../context/SmellsCacheManager";
 

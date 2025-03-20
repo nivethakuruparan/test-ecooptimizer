@@ -6,7 +6,7 @@ import { refactorSmellsFile } from "./commands/refactorSmells";
 import { openFile } from "./commands/openFile";
 import { registerFilterSmellCommands } from "./commands/filterSmells";
 import { jumpToSmell } from "./commands/jumpToSmell";
-import { SmellsDisplayProvider } from "./providers/SmellsDisplayProvider";
+import { SmellsDisplayProvider } from "./providers/SmellsViewProvider";
 import { checkServerStatus } from "./api/backend";
 import { FilterSmellsProvider } from "./providers/FilterSmellsProvider";
 import { SmellsCacheManager } from "./context/SmellsCacheManager"; // Updated import

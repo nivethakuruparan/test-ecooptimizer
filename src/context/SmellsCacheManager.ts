@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { createHash } from "crypto";
-import { SmellsDisplayProvider } from "../providers/SmellsDisplayProvider";
+import { SmellsDisplayProvider } from "../providers/SmellsViewProvider";
 
 /**
  * Manages caching of detected smells and file hashes to avoid redundant backend calls.
