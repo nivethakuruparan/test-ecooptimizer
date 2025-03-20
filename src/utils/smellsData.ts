@@ -8,6 +8,8 @@ import * as path from "path";
  */
 export interface FilterSmellConfig {
   name: string;
+  message_id: string;
+  acronym: string;
   enabled: boolean;
   analyzer_options?: Record<
     string,
@@ -76,8 +78,8 @@ export function getEnabledSmells(): Record<string, DetectSmellConfig> {
       .map(([smellKey, smellData]) => [
         smellKey,
         {
-          message_id: smellData.name, // Message ID mapped from the name field
-          acronym: smellData.name,
+          message_id: smellData.message_id,
+          acronym: smellData.acronym,
           options: Object.fromEntries(
             Object.entries(smellData.analyzer_options ?? {}).map(
               ([optionKey, optionData]) => [
