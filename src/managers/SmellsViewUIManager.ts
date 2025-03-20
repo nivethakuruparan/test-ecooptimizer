@@ -17,23 +17,36 @@ export class SmellsUIManager {
       fs.existsSync(element) && fs.statSync(element).isDirectory();
     const isSmellItem = !fs.existsSync(element) && !isDirectory;
 
-    const item = new vscode.TreeItem(
-      path.basename(element),
-      isDirectory || hasSmells
+    // Check if the file is outdated
+    const isOutdated =
+      !isDirectory && !isSmellItem && this.stateManager.isFileOutdated(element);
+
+    // Set the collapsible state
+    let collapsibleState: vscode.TreeItemCollapsibleState;
+    if (isDirectory) {
+      // Directories are always collapsible
+      collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    } else if (isSmellItem) {
+      // Smell items are never collapsible
+      collapsibleState = vscode.TreeItemCollapsibleState.None;
+    } else if (isOutdated) {
+      // Outdated files are not collapsible
+      collapsibleState = vscode.TreeItemCollapsibleState.None;
+    } else {
+      // Files with smells are collapsible
+      collapsibleState = hasSmells
         ? vscode.TreeItemCollapsibleState.Collapsed
-        : vscode.TreeItemCollapsibleState.None
-    );
+        : vscode.TreeItemCollapsibleState.None;
+    }
+
+    const item = new vscode.TreeItem(path.basename(element), collapsibleState);
 
     if (isDirectory) {
       item.contextValue = "ecoOptimizerFolder";
     } else if (!isSmellItem) {
       item.contextValue = "ecoOptimizerFile";
       this.assignOpenFileCommand(item, element);
-      this.updateFileItem(
-        item,
-        status,
-        this.stateManager.isFileOutdated(element)
-      );
+      this.updateFileItem(item, status, isOutdated);
     } else {
       item.contextValue = "ecoOptimizerSmell";
       const parentFile = this.stateManager.getFileForSmell(element);

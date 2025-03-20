@@ -53,6 +53,12 @@ export class SmellsDisplayProvider implements vscode.TreeDataProvider<string> {
         .map((file) => path.join(element, file));
     }
 
+    // Check if the file is outdated
+    if (this.stateManager.isFileOutdated(element)) {
+      return []; // Return an empty array if the file is outdated
+    }
+
+    // If the file is not outdated, return the detected smells
     const smells = this.stateManager.getSmellsForFile(element);
     return smells.map((smell) => {
       const smellItem = `${smell.acronym}: Line ${smell.occurrences
