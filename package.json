@@ -1,0 +1,186 @@
+{
+  "name": "eco-optimizer",
+  "displayName": "Eco Optimizer",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.98.0",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.21.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "eco-optimizer",
+          "title": "Eco Optimizer",
+          "icon": "assets/eco-icon.png"
+        }
+      ]
+    },
+    "views": {
+      "eco-optimizer": [
+        {
+          "id": "eco-optimizer.view",
+          "name": "Code Smells",
+          "icon": "assets/eco-icon.png"
+        },
+        {
+          "id": "eco-optimizer.filterView",
+          "name": "Filter Smells",
+          "icon": "assets/eco-icon.png"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "eco-optimizer.view",
+        "contents": "No code smells detected yet. Configure your workspace to start analysis.\n\n[Configure Workspace](command:eco-optimizer.configureWorkspace)\n\n[Read the docs](https://code.visualstudio.com/api) to learn how to use Eco-Optimizer.",
+        "when": "!workspaceState.workspaceConfigured"
+      }
+    ],
+    "commands": [
+      {
+        "command": "eco-optimizer.configureWorkspace",
+        "title": "Configure Workspace",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.resetConfiguration",
+        "title": "Reset Configuration",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.toggleSmellFilter",
+        "title": "Toggle Smell",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.editSmellFilterOption",
+        "title": "Edit Option",
+        "icon": "$(edit)",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.selectAllFilterSmells",
+        "title": "Select All Smells",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.deselectAllFilterSmells",
+        "title": "Deselect All Smells",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.openFile",
+        "title": "Open File",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.detectSmellsFolder",
+        "title": "Detect Smells for All Files",
+        "icon": "$(search)",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.detectSmellsFile",
+        "title": "Detect Smells",
+        "icon": "$(search)",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.refactorSmellsFile",
+        "title": "Refactor Smells By Type",
+        "icon": "$(tools)",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.jumpToSmell",
+        "title": "Jump to Smell in File",
+        "category": "Eco Optimizer"
+      },
+      {
+        "command": "eco-optimizer.wipeWorkCache",
+        "title": "Clear Smells Cache",
+        "category": "Eco Optimizer"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "eco-optimizer.resetConfiguration",
+          "when": "view == eco-optimizer.view && workspaceState.workspaceConfigured",
+          "group": "resource"
+        },
+        {
+          "command": "eco-optimizer.wipeWorkCache",
+          "when": "view == eco-optimizer.view && workspaceState.workspaceConfigured",
+          "group": "resource"
+        },
+        {
+          "command": "eco-optimizer.selectAllFilterSmells",
+          "when": "view == eco-optimizer.filterView",
+          "group": "resource"
+        },
+        {
+          "command": "eco-optimizer.deselectAllFilterSmells",
+          "when": "view == eco-optimizer.filterView",
+          "group": "resource"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "eco-optimizer.editSmellFilterOption",
+          "when": "viewItem == smellOption",
+          "group": "inline"
+        },
+        {
+          "command": "eco-optimizer.detectSmellsFolder",
+          "when": "viewItem == ecoOptimizerFolder",
+          "group": "inline"
+        },
+        {
+          "command": "eco-optimizer.detectSmellsFile",
+          "when": "viewItem == ecoOptimizerFile",
+          "group": "inline"
+        },
+        {
+          "command": "eco-optimizer.refactorSmellsFile",
+          "when": "viewItem == ecoOptimizerFile",
+          "group": "inline"
+        }
+      ]
+    }
+  }
+}
