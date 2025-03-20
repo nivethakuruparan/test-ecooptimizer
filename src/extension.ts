@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { configureWorkspace } from "./commands/configureWorkspace";
 import { resetConfiguration } from "./commands/resetConfiguration";
 import { detectSmellsFile, detectSmellsFolder } from "./commands/detectSmells";
-import { refactorSmellsFile } from "./commands/refactorSmells";
+import { refactorSmellsByType } from "./commands/refactorSmells";
 import { openFile } from "./commands/openFile";
 import { registerFilterSmellCommands } from "./commands/filterSmells";
 import { jumpToSmell } from "./commands/jumpToSmell";
@@ -107,8 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "eco-optimizer.refactorSmellsFile",
-      (fileUri) => refactorSmellsFile(smellsDisplayProvider, fileUri)
+      "eco-optimizer.refactorSmellsByType",
+      (fileUri) => refactorSmellsByType(smellsDisplayProvider, fileUri)
     )
   );
 

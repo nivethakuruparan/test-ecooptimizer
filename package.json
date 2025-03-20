@@ -120,7 +120,7 @@
         "category": "Eco Optimizer"
       },
       {
-        "command": "eco-optimizer.refactorSmellsFile",
+        "command": "eco-optimizer.refactorSmellsByType",
         "title": "Refactor Smells By Type",
         "icon": "$(tools)",
         "category": "Eco Optimizer"
@@ -176,7 +176,7 @@
           "group": "inline"
         },
         {
-          "command": "eco-optimizer.refactorSmellsFile",
+          "command": "eco-optimizer.refactorSmellsByType",
           "when": "viewItem == ecoOptimizerFile",
           "group": "inline"
         }
