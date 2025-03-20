@@ -6,36 +6,35 @@ import { refactorSmellsByType } from "./commands/refactorSmells";
 import { openFile } from "./commands/openFile";
 import { registerFilterSmellCommands } from "./commands/filterSmells";
 import { jumpToSmell } from "./commands/jumpToSmell";
+import { wipeWorkCache } from "./commands/wipeWorkCache";
 import { SmellsDisplayProvider } from "./providers/SmellsViewProvider";
 import { checkServerStatus } from "./api/backend";
 import { FilterSmellsProvider } from "./providers/FilterSmellsProvider";
-import { SmellsCacheManager } from "./context/SmellsCacheManager"; // Updated import
-import path from "path";
+import { SmellsCacheManager } from "./context/SmellsCacheManager";
+import { registerFileSaveListener } from "./listeners/fileSaveListener";
 
 /**
- * Activates the extension and registers all necessary commands and providers.
+ * Activates the Eco-Optimizer extension and registers all necessary commands, providers, and listeners.
  * @param context - The VS Code extension context.
  */
 export function activate(context: vscode.ExtensionContext) {
-  console.log("🚀 Activating Eco-Optimizer extension...");
+  console.log("Activating Eco-Optimizer extension...");
 
-  // ✅ Initialize SmellsCacheManager for managing caching
+  // Initialize the SmellsCacheManager for managing caching of smells and file hashes.
   const smellsCacheManager = new SmellsCacheManager(context);
 
-  // ===========================
-  // Initialize Code Smells View
-  // ===========================
+  // Initialize the Code Smells View.
   const smellsDisplayProvider = new SmellsDisplayProvider(context);
   const codeSmellsView = vscode.window.createTreeView("eco-optimizer.view", {
     treeDataProvider: smellsDisplayProvider,
   });
   context.subscriptions.push(codeSmellsView);
 
-  // ✅ Start periodic backend status checks (every 10 seconds)
+  // Start periodic backend status checks (every 10 seconds).
   checkServerStatus();
   setInterval(checkServerStatus, 10000);
 
-  // ✅ Track workspace configuration state
+  // Track the workspace configuration state.
   const workspaceConfigured = Boolean(
     context.workspaceState.get<string>("workspaceConfiguredPath")
   );
@@ -45,9 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
     workspaceConfigured
   );
 
-  // ===========================
-  // Register Workspace Commands
-  // ===========================
+  // Register workspace-related commands.
   context.subscriptions.push(
     vscode.commands.registerCommand("eco-optimizer.configureWorkspace", () =>
       configureWorkspace(context, smellsDisplayProvider)
@@ -60,9 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  // ===========================
-  // Initialize Filter Smells View
-  // ===========================
+  // Initialize the Filter Smells View.
   const filterSmellsProvider = new FilterSmellsProvider(context);
   const filterSmellsView = vscode.window.createTreeView(
     "eco-optimizer.filterView",
@@ -72,15 +67,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Associate the TreeView instance with the provider
+  // Associate the TreeView instance with the provider.
   filterSmellsProvider.setTreeView(filterSmellsView);
 
-  // Register filter-related commands
+  // Register filter-related commands.
   registerFilterSmellCommands(context, filterSmellsProvider);
 
-  // ===========================
-  // Register Code Smell Analysis Commands
-  // ===========================
+  // Register code smell analysis commands.
   context.subscriptions.push(
     vscode.commands.registerCommand("eco-optimizer.openFile", openFile)
   );
@@ -112,67 +105,29 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  // ===========================
-  // Register Jump to Smell Command
-  // ===========================
+  // Register the "Jump to Smell" command.
   context.subscriptions.push(
     vscode.commands.registerCommand("eco-optimizer.jumpToSmell", jumpToSmell)
   );
 
-  // ===========================
-  // Register Clear Smells Cache Command
-  // ===========================
+  // Register the "Clear Smells Cache" command.
   context.subscriptions.push(
     vscode.commands.registerCommand("eco-optimizer.wipeWorkCache", async () => {
-      const userResponse = await vscode.window.showWarningMessage(
-        "Are you sure you want to clear the smells cache? This action cannot be undone.",
-        { modal: true },
-        "Confirm"
-      );
-
-      if (userResponse === "Confirm") {
-        // ✅ Use SmellsCacheManager to clear cache & refresh UI
-        await smellsCacheManager.clearCacheAndRefreshUI(smellsDisplayProvider);
-
-        vscode.window.showInformationMessage(
-          "Smells cache cleared successfully."
-        );
-      } else {
-        vscode.window.showInformationMessage("Operation cancelled.");
-      }
+      await wipeWorkCache(smellsCacheManager, smellsDisplayProvider);
     })
   );
 
-  console.log("✅ Eco-Optimizer extension activated successfully.");
-
-  // Listen for file save events to detect outdated files
-  vscode.workspace.onDidSaveTextDocument(async (document) => {
-    const filePath = document.fileName;
-
-    // ✅ Ignore files that have no cached smells
-    const cachedSmells = smellsCacheManager.getCachedSmells(filePath);
-    if (!cachedSmells) return;
-
-    // Compute the new hash and compare it with the stored hash
-    const newHash = smellsCacheManager.computeFileHash(document.getText());
-    const oldHash = smellsCacheManager.getStoredFileHash(filePath);
-
-    if (oldHash && newHash !== oldHash) {
-      vscode.window.showWarningMessage(
-        `The file "${path.basename(
-          filePath
-        )}" has been modified since the last analysis.`
-      );
-
-      // ✅ Mark file as outdated in the UI
-      smellsDisplayProvider.markFileAsOutdated(filePath);
-    }
-  });
+  // Register the file save listener to detect outdated files.
+  const fileSaveListener = registerFileSaveListener(
+    smellsCacheManager,
+    smellsDisplayProvider
+  );
+  context.subscriptions.push(fileSaveListener);
 }
 
 /**
- * Deactivates the extension.
+ * Deactivates the Eco-Optimizer extension.
  */
 export function deactivate() {
-  console.log("⚡ Deactivating Eco-Optimizer extension...");
+  console.log("Deactivating Eco-Optimizer extension...");
 }
