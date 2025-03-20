@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { getStatusIcon, getStatusMessage } from "../utils/smellStatus"; // Utility functions for status icons and messages
+import { FileItemHandler } from "../handlers/FileItemHandler";
+import { SmellItemHandler } from "../handlers/SmellItemHandler";
+import { FolderItemHandler } from "../handlers/FolderItemHandler";
 
 /**
  * Represents a detected smell in the codebase.
@@ -63,37 +65,23 @@ export class SmellsDisplayProvider implements vscode.TreeDataProvider<string> {
         : vscode.TreeItemCollapsibleState.None
     );
 
-    // Set context values for tree items (used for command execution)
+    // Handle folder items
     if (isDirectory) {
-      item.contextValue = "ecoOptimizerFolder";
-    } else if (!isSmellItem) {
-      item.contextValue = "ecoOptimizerFile";
-    } else {
-      item.contextValue = "ecoOptimizerSmell";
+      FolderItemHandler.setContextValue(item);
     }
+    // Handle file items
+    else if (!isDirectory && !isSmellItem) {
+      FileItemHandler.setContextValue(item);
+      FileItemHandler.assignOpenFileCommand(item, element);
 
-    // Assigns the appropriate icon and description for outdated files
-    if (!isDirectory && !isSmellItem) {
-      item.command = {
-        command: "eco-optimizer.openFile",
-        title: "Open File",
-        arguments: [vscode.Uri.file(element)],
-      };
-
-      // If the file has been modified since last analysis, mark it as outdated
-      if (this.modifiedFiles.has(element)) {
-        item.description = "outdated"; // Add "outdated" indicator in sidebar
-        item.iconPath = new vscode.ThemeIcon(
-          "warning",
-          new vscode.ThemeColor("charts.orange")
-        ); // Warning icon
-      } else {
-        item.iconPath = getStatusIcon(status); // Normal status icon
-      }
+      // Determine the status
+      const fileStatus = this.modifiedFiles.has(element) ? "outdated" : status;
+      FileItemHandler.updateFileItem(item, fileStatus);
     }
+    // Handle smell items
+    else {
+      SmellItemHandler.setContextValue(item);
 
-    // Assigns a jump-to-smell command for detected smell items
-    if (!fs.existsSync(element) && element.includes(": Line")) {
       const parentFile = this.smellToFileMap.get(element);
       if (parentFile) {
         const [, lineStr] = element.split(": Line ");
@@ -101,19 +89,11 @@ export class SmellsDisplayProvider implements vscode.TreeDataProvider<string> {
           .split(",")
           .map((line) => parseInt(line.trim(), 10));
         const firstLine = lines.length > 0 ? lines[0] - 1 : 0;
-
-        item.command = {
-          command: "eco-optimizer.jumpToSmell",
-          title: "Jump to Smell",
-          arguments: [parentFile, firstLine],
-        };
+        SmellItemHandler.assignJumpToSmellCommand(item, parentFile, firstLine);
       }
-    }
 
-    // Sets the tooltip text for the tree item
-    item.tooltip = isSmellItem
-      ? element
-      : `${path.basename(element)} (${getStatusMessage(status)})`;
+      SmellItemHandler.setSmellTooltip(item, element);
+    }
 
     return item;
   }
@@ -136,10 +116,11 @@ export class SmellsDisplayProvider implements vscode.TreeDataProvider<string> {
 
     // If it's a directory, return the Python files inside
     if (isDirectory) {
-      return fs
+      const files = fs
         .readdirSync(element)
         .filter((file) => file.endsWith(".py"))
         .map((file) => path.join(element, file));
+      return files;
     }
 
     // If it's a file, return the detected smells in that file

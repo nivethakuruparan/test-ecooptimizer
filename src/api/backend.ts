@@ -1,7 +1,8 @@
+import { envConfig } from "../utils/envConfig";
 import { serverStatus } from "../utils/serverStatus";
 import { ServerStatusType } from "../utils/serverStatus";
 
-const BASE_URL = "127.0.0.1:8000"; // Ensure SERVER_URL is correctly set
+const BASE_URL = `http://${envConfig.SERVER_URL || "127.0.0.1:8000"}`;
 
 /**
  * Checks the backend server status and updates the VS Code UI accordingly.
